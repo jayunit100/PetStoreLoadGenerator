@@ -45,6 +45,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class LoadGen {
 
+    public static boolean TESTING=false;
+
     int nStores = 1000;
     int nCustomers = 1000;
     double simulationLength = -1;
@@ -128,7 +130,7 @@ public class LoadGen {
         return new LoadGen(nStores,nCustomers,simulationLength,seed,outputDir);
     }
 
-    public static String print(Transaction t){
+    public static String printable(Transaction t){
         return t.getStore().getId() + "," +
                         t.getStore().getLocation().getZipcode() + "," +
                         t.getStore().getLocation().getCity() + "," +
@@ -206,7 +208,7 @@ public class LoadGen {
                     transactionQueue.drainTo(transactionsToWrite);
                     StringBuffer lines = new StringBuffer();
                     while(!transactionsToWrite.isEmpty()){
-                        lines.append(transactionsToWrite.pop()+"\n");
+                        lines.append(printable(transactionsToWrite.pop())+"\n");
                         total++;
                     }
                    try{
@@ -237,7 +239,11 @@ public class LoadGen {
             LinkedBlockingQueue<Transaction> q = startWriteQueue(Paths.get(lg.outputDir),10000);
             while(true){
                 lg.iterateData(q, System.currentTimeMillis());
-                System.out.println("100,000 transactions made in " + (System.currentTimeMillis()-start)/1000.0f + " Seconds");
+                //if testing , dont run forever.  TODO, make runtime configurable.
+                if(TESTING){
+                    System.out.println("DONE...");
+                    return;
+                }
             }
         }
         catch(Throwable t){
