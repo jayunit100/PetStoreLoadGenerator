@@ -27,6 +27,11 @@ import com.github.rnowling.bps.datagenerator.*;
 import com.github.rnowling.bps.datagenerator.framework.SeedFactory;
 import com.google.common.collect.Lists;
 
+import java.io.DataOutput;
+import java.io.DataOutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,7 +48,9 @@ import java.util.concurrent.LinkedBlockingQueue;
  * <p/>
  * Then, spark writes those line items out as a distributed hadoop file glob.
  */
-public class LoadGen {
+public abstract class LoadGen {
+
+    public abstract LinkedBlockingQueue<Transaction> startWriteQueue(int qSize);
 
     public static boolean TESTING=false;
 
@@ -51,126 +58,28 @@ public class LoadGen {
     int nCustomers = 1000;
     double simulationLength = -1;
     long seed = System.currentTimeMillis();
-    String outputDir = "/shared";
+    String outputDir = null;
 
-    static final String[] DEFAULT = new String[]{"/tmp","1000","100000","1500","13241234"};
-    static final String DEFAULT_EXPECTED = "10 to 25K transactions per second on i7 chip w/ SSD";
-    public LoadGen(int nStores, int nCustomers, double simulationLength, long seed, String outputDir) {
+    public LoadGen(int nStores, int nCustomers, double simulationLength, long seed) throws Throwable {
         this.nStores = nStores;
         this.nCustomers = nCustomers;
         this.simulationLength = simulationLength;
         this.seed = seed;
-        this.outputDir = outputDir;
     }
 
-    public static void printUsage() {
-        String usage =
-                "BigPetStore Data Generator.\n" +
-                        "Usage: outputDir nStores nCustomers simulationLength [seed]\n" +
-                        "outputDir - (string) directory to write files\n" +
-                        "nStores - (int) number of stores to generate\n" +
-                        "nCustomers - (int) number of customers to generate\n" +
-                        "simulationLength - (float) number of days to simulate\n" +
-                        "seed - (long) seed for RNG. If not given, one is reandomly generated.\n";
-        System.err.println(usage);
-    }
-
-    public static LoadGen parseArgs(String[] args) {
-        if(args.length==0){
-            System.out.println("Running default simulation, which should result in " + DEFAULT_EXPECTED);
-            return parseArgs(DEFAULT);
-        }
-        int nStores = 1000;
-        int nCustomers = 1000;
-        double simulationLength = -1;
-        long seed = System.currentTimeMillis();
-        String outputDir = "/shared";
-
-        int PARAMS=5;
-        if (args.length != PARAMS && args.length != (PARAMS - 1)) {
-            printUsage();
-            System.exit(1);
-        }
-        outputDir = args[0];
-        try {
-            nStores = Integer.parseInt(args[1]);
-        } catch (Throwable t) {
-            System.err.println("Unable to parse '" + args[1] + "' as an integer for nStores.\n");
-            printUsage();
-            System.exit(1);
-        }
-        try {
-            nCustomers = Integer.parseInt(args[2]);
-        } catch (Throwable t) {
-            System.err.println("Unable to parse '" + args[2] + "' as an integer for nCustomers.\n");
-            printUsage();
-            System.exit(1);
-        }
-        try {
-            simulationLength = Double.parseDouble(args[3]);
-        } catch (Throwable t) {
-            System.err.println("Unable to parse '" + args[3] + "' as a float for simulationLength.\n");
-            printUsage();
-            System.exit(1);
-        }
-
-        //If seed isnt present, then no is used seed.
-        if (args.length == PARAMS) {
-            try {
-                seed = Long.parseLong(args[4]);
-            } catch (Throwable t) {
-                System.err.println("Unable to parse '" + args[4] + "' as a long for seed.\n");
-                printUsage();
-                System.exit(1);
-            }
-        } else {
-            seed = new Random().nextLong();
-        }
-
-        return new LoadGen(nStores,nCustomers,simulationLength,seed,outputDir);
-    }
-
-    public static String printable(Transaction t){
-        return t.getStore().getId() + "," +
-                        t.getStore().getLocation().getZipcode() + "," +
-                        t.getStore().getLocation().getCity() + "," +
-                        t.getStore().getLocation().getState() + "," +
-                        t.getCustomer().getId() + "," +
-                        t.getCustomer().getName().getFirst()+ "," +
-                        t.getCustomer().getName().getSecond() + "," +
-                        t.getCustomer().getLocation().getZipcode() + "," +
-                        t.getCustomer().getLocation().getCity() + "," +
-                        t.getCustomer().getLocation().getState() + "," +
-                        t.getId() + "," +
-                        t.getDateTime() +","+
-                        join(t.getProducts(), ",");
-        }
-
-    //borrowed from apache.
-    public static String join(Collection var0, Object var1) {
-        StringBuffer var2 = new StringBuffer();
-
-        for(Iterator var3 = var0.iterator(); var3.hasNext(); var2.append(var3.next())) {
-            if(var2.length() != 0) {
-                var2.append(var1);
-            }
-        }
-
-        return var2.toString();
-    }
 
     /**
      * Helper function.  Makes sure we sleep for a while
      * when queue is empty and also when we startup.
      */
-    private static void waitFor(long milliseconds, LinkedBlockingQueue<Transaction> q){
+    public void waitFor(long milliseconds, LinkedBlockingQueue<Transaction> q){
         try{
             Thread.sleep(milliseconds);
         }
         catch(Throwable t){
         }
         //now, sleep for 2 seconds at a time until queue is full.
-            while(q.size()<100) {
+        while(q.size()<100) {
             try{
                 Thread.sleep(2000L);
             }
@@ -180,63 +89,19 @@ public class LoadGen {
         }
     }
 
-
     static final long startTime = System.currentTimeMillis();
     static double total = 0;
-    /**
-     * Appends to files.
-     * @param path
-     * @return
-     */
-    public static LinkedBlockingQueue<Transaction> startWriteQueue(final Path path, final int milliseconds){
-        if(! path.toFile().isDirectory()) {
-            throw new RuntimeException("Input for the queue Should be a directory! Files will be transactions0.txt, transactions1.txt, and so on.");
-        }
 
-        /**
-         * Write queue.   Every 5 seconds, write
-         */
-        final LinkedBlockingQueue<Transaction> transactionQueue = new LinkedBlockingQueue<Transaction>(1000000);
-        new Thread(){
-            @Override
-            public void run() {
-                int fileNumber=0;
-                while(true){
-                    waitFor(milliseconds, transactionQueue);
-                    System.out.println("Clearing " + transactionQueue.size() + " elements");
-                    Stack<Transaction> transactionsToWrite = new Stack<Transaction>();
-                    transactionQueue.drainTo(transactionsToWrite);
-                    StringBuffer lines = new StringBuffer();
-                    while(!transactionsToWrite.isEmpty()){
-                        lines.append(printable(transactionsToWrite.pop())+"\n");
-                        total++;
-                    }
-                   try{
-                       Path outputFile = Paths.get(path.toFile().getAbsolutePath(),"/transactions"+fileNumber++ +".txt");
-                       Files.write(outputFile, lines.toString().getBytes());
-                       System.out.println("WRITE FILE to " + outputFile.toFile().length() + "bytes -> " + outputFile.toFile().getAbsolutePath());
-                   }
-                   catch(Throwable t){
-
-                   }
-                   System.out.println(
-                           "TRANSACTIONS SO FAR " + total++ +
-                           " RATE " + total/((System.currentTimeMillis()-startTime)/1000));
-                }
-            }
-        }.start();
-        return transactionQueue;
-    }
 
 
     public static void main(String[] args){
         try {
-            LoadGen lg = parseArgs(args);
+            LoadGen lg = LoadGenFactory.parseArgs(args);
             float count = 0.0f;
             long start=System.currentTimeMillis();
 
             //write everything to /tmp, every 20 seconds.
-            LinkedBlockingQueue<Transaction> q = startWriteQueue(Paths.get(lg.outputDir),10000);
+            LinkedBlockingQueue<Transaction> q = lg.startWriteQueue(10000);
             while(true){
                 lg.iterateData(q, System.currentTimeMillis());
                 //if testing , dont run forever.  TODO, make runtime configurable.
@@ -293,6 +158,9 @@ public class LoadGen {
         PurchasingProfileGenerator profileGen = new PurchasingProfileGenerator(products, seedFactory);
         PurchasingProfile profile = profileGen.generate();
 
+        //Stop either if
+        //1) the queue is full
+        //2) run out of customers).
         while(queue.remainingCapacity()>0 && custIter.hasNext()){
             Customer cust = custIter.next();
             int transactionsForThisCustomer = 0;
