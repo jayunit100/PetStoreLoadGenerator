@@ -6,13 +6,18 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIUtils;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -24,30 +29,40 @@ import java.util.List;
  */
 public class Utils {
 
-    public static void get(URL path , String request) throws Exception {
+    public static HttpResponse get(String hostnam) throws Exception {
+        URI uri = new URI(hostnam);
+        return get(uri);
+    }
+
+    public static HttpResponse get(String hostname ,  String resource, List<? extends NameValuePair> params) throws Exception {
+        //URI uri = URIUtils.createURI("http", "www.google.com", -1, "/search",
+          URI uri =
+                  URIUtils.createURI("http", hostname, -1, resource,
+                  URLEncodedUtils.format(params, "UTF-8"), null);
+        return get(uri);
+    }
+
+    public static HttpResponse get(URI uri) throws Exception {
+        HttpGet httppost = new HttpGet(uri);
         HttpClient httpclient = HttpClients.createDefault();
-        System.out.println(path + " " + path.toURI() + " " +path.toURI().getPath());
-        HttpPost httppost = new HttpPost(path.toURI());
-
-        // Request parameters and other properties.
-        List<NameValuePair> params = new java.util.ArrayList<NameValuePair>(2);
-        //params.add(new BasicNameValuePair("param-1", "12345"));
-        //params.add(new BasicNameValuePair("param-2", "Hello!"));
-        //httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-
+        //System.out.println("sendindg " + httppost.getURI().toASCIIString());
         //Execute and get the response.
-        HttpResponse response = httpclient.execute(httppost);
-        HttpEntity entity = response.getEntity();
+        try {
+            HttpResponse response = httpclient.execute(httppost);
 
-        if (entity != null) {
-            InputStream instream = entity.getContent();
-            try {
-                // do something useful
-            } finally {
-                instream.close();
-            }
+            if(response.getStatusLine().getStatusCode()!=200)
+                System.err.println("FAILURE! " + response.getStatusLine().getStatusCode());
         }
-        System.out.println("response : " + response.getStatusLine().getStatusCode());
+        catch (Throwable t) {
+            System.out.println("failed, sleeing");
+            Thread.sleep(10000);
+        }
+        return null;
+    }
+
+    public static String json(Transaction t) throws Exception{
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(t) ;
     }
 
     public static String printable(Transaction t){

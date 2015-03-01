@@ -97,18 +97,20 @@ public abstract class LoadGen {
     public static void main(String[] args){
         try {
             LoadGen lg = LoadGenFactory.parseArgs(args);
-            float count = 0.0f;
-            long start=System.currentTimeMillis();
 
+            long start=System.currentTimeMillis();
+            int runs = 0;
             //write everything to /tmp, every 20 seconds.
             LinkedBlockingQueue<Transaction> q = lg.startWriteQueue(10000);
             while(true){
                 lg.iterateData(q, System.currentTimeMillis());
+                runs++;
                 //if testing , dont run forever.  TODO, make runtime configurable.
-                if(TESTING){
+                if(TESTING && runs == 5){
                     System.out.println("DONE...");
                     return;
                 }
+
             }
         }
         catch(Throwable t){
