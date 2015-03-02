@@ -1,11 +1,21 @@
+# I'm in a hude rush, how do I use it? #
+
+Just run the dockerfile! 
+
+```
+docker run -t -i jayunit100/bigpetstore-load-generator
+```
+
+After you run it, you can read below to customize it.  
+
 # BigPetStore Data Generator #
 
 An infiniterator for bigpetstore !
 
 If you're not familiar with bigpetstore, check out the apache bigtop project, which uses it to process data with spark, and the original whitepaper on the data generator (http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=7034765). This repository writes bigpetstore transactions to 
 
-- a rotating file queue OR
-- a REST API calling queue.
+- a rotating *file queue* OR
+- a *REST API* calling queue.
 
 - You better have a consumer somewhere, otherwise it will fill up your disk very quickly !
 
@@ -23,9 +33,13 @@ gradlew build
 
 And then you can run the jar easily.
 
+## Generating FileSystem load ##
+
 ```
  java -cp ./build/libs/PetStoreLoadGenerator-1.0.jar:libs/* org.apache.bigtop.load.LoadGen /tmp 1 5 10000 123
 ```
+
+## Generating REST load ## 
 OR Replace the file path with a REST API root (it will jsonify the transactions, and send them as the final argument).
 
 ```
