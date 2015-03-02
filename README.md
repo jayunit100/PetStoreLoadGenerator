@@ -42,13 +42,25 @@ And then you can run the jar easily.
 
 ## Generating FileSystem load ##
 
+From docker
+
+```
+docker run -t -i jayunit100/bigpetstore-load-generator /opt/PetStoreLoadGenerator-1.0/bin/PetStoreLoadGenerator /tmp/ 1 1 3.0
+```
+or Java
 ```
  java -cp ./build/libs/PetStoreLoadGenerator-1.0.jar:libs/* org.apache.bigtop.load.LoadGen /tmp 1 5 10000 123
 ```
 
 ## Generating REST load ## 
-OR Replace the file path with a REST API root (it will jsonify the transactions, and send them as the final argument).
+OR Replace the file path with a REST API root (it will jsonify the transactions, and send them as the final url portion).
 
+From docker
+
+```
+/opt/PetStoreLoadGenerator-1.0/bin/PetStoreLoadGenerator htttp://localhost:3000/restapi/rpush/ 1 5 10000 123
+```
+Or from java
 ```
  java -cp ./build/libs/PetStoreLoadGenerator-1.0.jar:libs/* org.apache.bigtop.load.LoadGen http://localhost:3000/bigpetstore-api/rpush/ 1 5 10000 123
 
