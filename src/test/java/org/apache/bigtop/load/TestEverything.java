@@ -65,7 +65,8 @@ public class TestEverything {
         params.add(new BasicNameValuePair("b3", "2"));
         params.add(new BasicNameValuePair("bsdf", "2"));
 
-        HttpResponse r = Utils.get("localhost:8129","", params); //i.e. localhost:8129
+        HttpResponse r = Utils.get("localhost:8129","", params);
+        System.out.println(r );
         String contents = org.apache.commons.io.IOUtils.toString(r.getEntity().getContent());
         System.out.println(contents);
         Assert.assertTrue(contents.contains("bsdf === 2"));

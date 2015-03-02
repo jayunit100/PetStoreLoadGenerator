@@ -35,11 +35,14 @@ public class Utils {
     }
 
     public static HttpResponse get(String hostname ,  String resource, List<? extends NameValuePair> params) throws Exception {
+        System.out.println("getting http "+hostname);
         //URI uri = URIUtils.createURI("http", "www.google.com", -1, "/search",
           URI uri =
                   URIUtils.createURI("http", hostname, -1, resource,
                   URLEncodedUtils.format(params, "UTF-8"), null);
-        return get(uri);
+        System.out.println(uri.toASCIIString());
+       HttpResponse respo =  get(uri);
+       return respo;
     }
 
     public static HttpResponse get(URI uri) throws Exception {
@@ -49,14 +52,15 @@ public class Utils {
         //Execute and get the response.
         try {
             HttpResponse response = httpclient.execute(httppost);
-
             if(response.getStatusLine().getStatusCode()!=200)
                 System.err.println("FAILURE! " + response.getStatusLine().getStatusCode());
+            return response;
         }
         catch (Throwable t) {
             System.out.println("failed, sleeing");
             Thread.sleep(10000);
         }
+        System.err.println("FAILURE getting URI " + uri.toASCIIString());
         return null;
     }
 
