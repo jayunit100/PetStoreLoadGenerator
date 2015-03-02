@@ -10,6 +10,8 @@ After you run it, you can read below to customize it.
 
 # BigPetStore Data Generator #
 
+See related project on github, jayunit100/PetStoreBook, for example usage.
+
 An infiniterator for bigpetstore !
 
 If you're not familiar with bigpetstore, check out the apache bigtop project, which uses it to process data with spark, and the original whitepaper on the data generator (http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=7034765). This repository writes bigpetstore transactions to 
@@ -23,8 +25,13 @@ If you're not familiar with bigpetstore, check out the apache bigtop project, wh
 
 - Also PR's are welcome !
 
-# Get Started ! #
+# Get started by building the distribution #
 
+```
+gradlew distZip
+```
+
+# Get Started by building the jar #
 Clone this repository.  Then just run
 
 ```
