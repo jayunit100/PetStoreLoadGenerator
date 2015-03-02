@@ -37,6 +37,7 @@ public class TestEverything {
     /**
      * Only for testing realtime web app.
      */
+    @Ignore
     @org.junit.Test
     public void testWebLoadGen(){
         LoadGen.TESTING=true;

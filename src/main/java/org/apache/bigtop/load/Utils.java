@@ -57,7 +57,7 @@ public class Utils {
             return response;
         }
         catch (Throwable t) {
-            System.out.println("failed, sleeing");
+            System.out.println("failed, sleeping");
             Thread.sleep(10000);
         }
         System.err.println("FAILURE getting URI " + uri.toASCIIString());

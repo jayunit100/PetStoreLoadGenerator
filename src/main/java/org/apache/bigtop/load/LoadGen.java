@@ -97,7 +97,6 @@ public abstract class LoadGen {
     public static void main(String[] args){
         try {
             LoadGen lg = LoadGenFactory.parseArgs(args);
-
             long start=System.currentTimeMillis();
             int runs = 0;
             //write everything to /tmp, every 20 seconds.
@@ -106,11 +105,10 @@ public abstract class LoadGen {
                 lg.iterateData(q, System.currentTimeMillis());
                 runs++;
                 //if testing , dont run forever.  TODO, make runtime configurable.
-                if(TESTING && runs == 5){
+                if(TESTING && runs == 2){
                     System.out.println("DONE...");
                     return;
                 }
-
             }
         }
         catch(Throwable t){
