@@ -49,7 +49,8 @@ docker run -t -i jayunit100/bigpetstore-load-generator /opt/PetStoreLoadGenerato
 ```
 or Java
 ```
- java -cp ./build/libs/PetStoreLoadGenerator-1.0.jar:libs/* org.apache.bigtop.load.LoadGen /tmp 1 5 10000 123
+ gradle clean fatJar
+ java -cp ./build/libs/PetStoreLoadGenerator-1.0.jar org.apache.bigtop.load.LoadGen /tmp 1 5 10000 123
 ```
 
 ## Generating REST load ## 
@@ -58,11 +59,12 @@ OR Replace the file path with a REST API root (it will jsonify the transactions,
 From docker
 
 ```
-/opt/PetStoreLoadGenerator-1.0/bin/PetStoreLoadGenerator htttp://localhost:3000/restapi/rpush/ 1 5 10000 123
+docker run -t -i jayunit100/bigpetstore-load-generator /opt/PetStoreLoadGenerator-1.0/bin/PetStoreLoadGenerator htttp://localhost:3000/restapi/rpush/ 1 5 10000 123
 ```
 Or from java
 ```
- java -cp ./build/libs/PetStoreLoadGenerator-1.0.jar:libs/* org.apache.bigtop.load.LoadGen http://localhost:3000/bigpetstore-api/rpush/ 1 5 10000 123
+gradle clean fatJar
+java -cp ./build/libs/PetStoreLoadGenerator-1.0.jar org.apache.bigtop.load.LoadGen http://localhost:3000/rpush/guestbook/ 4 4 1000 123
 
 ```
 

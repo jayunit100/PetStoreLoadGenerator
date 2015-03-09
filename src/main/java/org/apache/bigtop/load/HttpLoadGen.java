@@ -71,6 +71,8 @@ public class HttpLoadGen extends LoadGen {
                         }
                         catch (Throwable t) {
                             System.err.println("transaction failed.");
+                            t.printStackTrace();
+
                         }
                         System.out.println(
                                 "TRANSACTIONS SO FAR " + total++ +
