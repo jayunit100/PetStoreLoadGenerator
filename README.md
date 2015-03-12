@@ -1,4 +1,4 @@
-# WE'VE MOVED TO APACHE BIGTOP # 
+# WE'VE MOVED TO APACHE BIGTOP
 
 I have recently commited this code to apache bigtop, and it is now maintained in the ASF.  Come join us and pull the code down !
 
