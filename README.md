@@ -8,7 +8,7 @@ For now, this particular repository is thus not undergoing any more maintainance
 
 However, if you pull request to it, I'll definetly be happy to look it over and merge :)
 
-# I'm in a huge rush, how do I use it? #
+*I'm in a huge rush, how do I use it?* 
 
 Just run the dockerfile! 
 
@@ -18,7 +18,7 @@ docker run -t -i jayunit100/bigpetstore-load-generator
 
 After you run it, you can read below to customize it.  
 
-# BigPetStore Data Generator #
+*BigPetStore Data Generator*
 
 See related project on github, jayunit100/PetStoreBook, for example usage.
 
@@ -35,13 +35,14 @@ If you're not familiar with bigpetstore, check out the apache bigtop project, wh
 
 - Also PR's are welcome !
 
-# Get started by building the distribution #
+*Get started by building the distribution*
 
 ```
 gradlew distZip
 ```
 
-# Get Started by building the jar #
+*Get Started by building the jar*
+
 Clone this repository.  Then just run
 
 ```
@@ -50,7 +51,7 @@ gradlew build
 
 And then you can run the jar easily.
 
-## Generating FileSystem load ##
+*Generating FileSystem load*
 
 From docker
 
@@ -63,7 +64,7 @@ or Java
  java -cp ./build/libs/PetStoreLoadGenerator-1.0.jar org.apache.bigtop.load.LoadGen /tmp 1 5 10000 123
 ```
 
-## Generating REST load ## 
+*Generating REST load* 
 OR Replace the file path with a REST API root (it will jsonify the transactions, and send them as the final url portion).
 
 From docker
@@ -100,7 +101,7 @@ And so on.
 
 Have fun ! For me, I was able to generate 25k transactions per minute.
 
-# Whats this for, how do I get help ? #
+*Whats this for, how do I get help ?*
 
 To understand the BigPetStore application, you can go to the apache bigtop user list.  This is based on a data generator
 which was published recently http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=7034765.
@@ -108,7 +109,7 @@ which was published recently http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumbe
 We also have a parallel Spark based generator,
 which is here https://github.com/apache/bigtop/tree/master/bigtop-bigpetstore/bigpetstore-spark.
 
-# OUTPUT #
+*OUTPUT*
 
 ```
 jayunit100smacbookpro:PetStoreLoadGenerator jayunit100java -cp ./build/libs/PetStoreLoadGenerator-1.0.jar:libs/* org.apache.bigtop.load.LoadGen
