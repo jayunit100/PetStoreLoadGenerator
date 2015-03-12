@@ -1,4 +1,14 @@
-# I'm in a hude rush, how do I use it? #
+# WE'VE MOVED TO APACHE BIGTOP # 
+
+I have recently commited this code to apache bigtop, and it is now maintained in the ASF.  Come join us and pull the code down !
+
+https://github.com/apache/bigtop/tree/master/bigtop-bigpetstore/bigpetstore-transaction-queue
+
+For now, this particular repository is thus not undergoing any more maintainance or development.  
+
+However, if you pull request to it, I'll definetly be happy to look it over and merge :)
+
+# I'm in a huge rush, how do I use it? #
 
 Just run the dockerfile! 
 
